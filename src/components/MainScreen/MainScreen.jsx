@@ -72,20 +72,21 @@ class MainScreen extends Component {
         let downloadedImages = []
 
         for( let i = 0; i < pages; i++) {
+          let index = i > 9 ? i : `0${i}`;
           let img = imagelink.replace("score_0", `score_${i}`)
 
           if (this.state.format == "svg") {
             this.props.svg2img(img, (error, buffer) => {
-              downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.png`)
-              this.props.fs.writeFile(`${this.state.saveLocation}/${title}_${i}.png`, buffer, () => {
+              downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.png`)
+              this.props.fs.writeFile(`${this.state.saveLocation}/${title}_${index}.png`, buffer, () => {
                 if ( i == pages-1 && this.state.savePdf ) {
                   this.savePdf(downloadedImages.sort(), title)
                 }
               })
             })
           } else {
-            this.download(img, `${this.state.saveLocation}/${title}_${i}.${this.state.format}`, () => {
-              downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.${this.state.format}`)
+            this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
+              downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`)
             })
 
             if ( i == pages-1 && this.state.savePdf ) {
