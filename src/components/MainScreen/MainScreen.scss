@@ -120,10 +120,12 @@
   display: flex;
   text-align: center;
   align-items: center;
-  margin-top: 10px;
+  height: 100px;
+  margin-top: 50px;
+  transition: opacity 1000ms ease-in-out;
 
   img {
-    height: 200px;
+    height: 100px;
     width: auto;
     margin: 0 10px;
   }

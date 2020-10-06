@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { image } from 'superagent/lib/node/parsers'
 
 import './MainScreen.scss'
 
@@ -50,6 +51,10 @@ class MainScreen extends Component {
   };
 
   handleSubmit(event) {
+    this.setState({
+      images: [], dom: null, format: ''
+    })
+
     event.preventDefault()
     superagent
       .get(this.state.link)
@@ -74,6 +79,7 @@ class MainScreen extends Component {
         for( let i = 0; i < pages; i++) {
           let index = i > 9 ? i : `0${i}`;
           let img = imagelink.replace("score_0", `score_${i}`)
+          images.push(img)
 
           if (this.state.format == "svg") {
             this.props.svg2img(img, (error, buffer) => {
@@ -94,9 +100,6 @@ class MainScreen extends Component {
             }
           }
         }
-
-
-        console.log("images", downloadedImages)
 
         this.setState({
           images: images
@@ -161,7 +164,7 @@ class MainScreen extends Component {
         </div>
 
         <button disabled={!this.state.saveLocation || !this.state.link} onClick={this.handleSubmit} type="submit">DOWNLOAD</button>
-        <div className="preview">
+        <div className="preview" style={{ opacity: this.state.images ? 1 : 0 }}>
         { this.state.images && this.state.images.map( (em, i) => (
             <img src={em} alt="i"/>
 
