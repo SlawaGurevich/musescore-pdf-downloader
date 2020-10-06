@@ -15,8 +15,8 @@ class MainScreen extends Component {
       images: [],
       saveLocation: '',
       format: '',
-      saveImages: false,
-      savePdf: false
+      saveImages: true,
+      savePdf: true
     }
 
     this.onLinkChange = this.handleChange.bind(this)
@@ -58,21 +58,45 @@ class MainScreen extends Component {
       .end((error, response) => {
 
         var doc = new DOMParser().parseFromString(response.text, "text/html")
+        console.group(response.text)
 
         let images = []
+        let title = doc.querySelectorAll('meta[name="twitter:title"]')[0].content
         let imagelink = doc.querySelectorAll('meta[property="og:image"]')[0].attributes.content.nodeValue
+
         this.getFormat(imagelink)
+
+        let downloadedImages = []
 
         for( let i = 0; i < 3; i++) {
           let img = imagelink.replace("score_0", `score_${i}`)
           images.push(img)
-          this.download(img, `${this.state.saveLocation}/score_${i}.${this.state.format}`, () => {console.log("done")})
+          this.download(img, `${this.state.saveLocation}/${title}_${i}.${this.state.format}`, () => {
+            if ( i == 2 && this.state.savePdf ) {
+              this.props.imgToPDF(downloadedImages, 'A4').pipe(this.props.fs.createWriteStream(`${this.state.saveLocation}/${title}.pdf`));
+
+              if ( !this.state.saveImages ) {
+                downloadedImages.forEach(img => {
+                  try {
+                    this.props.fs.unlinkSync(img)
+                  } catch(err) {
+                    console.log(err)
+                  }
+                })
+              }
+            }
+          })
+          downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.${this.state.format}`)
         }
+
+
+        console.log("images", downloadedImages)
 
         this.setState({
           images: images
         })
       })
+
   }
 
   getFormat = (link) => {
@@ -96,13 +120,10 @@ class MainScreen extends Component {
         <div className="main-screen__musescore-logo">
           <img src="Logo_inApp.png" alt=""/>
         </div>
-        <form onSubmit={this.handleSubmit}>
+        <form>
           <div className="button-input__wrapper">
             <input placeholder="Paste musescore url" onChange={this.onLinkChange} value={this.state.value} id="musescoreUrl" type="text"/>
           </div>
-          { this.state.images && this.state.images.map( (em, i) => (
-            <img src={em} alt="i"/>
-          ) ) }
         </form>
         <div className="button-input__wrapper">
           <input type="text" value={ this.state.saveLocation || "Please select a location!" } readOnly={true} />
@@ -119,7 +140,14 @@ class MainScreen extends Component {
             <span class="checkmark"></span>
           </label>
         </div>
-        <button disabled={!this.state.saveLocation || !this.state.link} type="submit">DOWNLOAD</button>
+
+        <button disabled={!this.state.saveLocation || !this.state.link} onClick={this.handleSubmit} type="submit">DOWNLOAD</button>
+        <div className="preview">
+        { this.state.images && this.state.images.map( (em, i) => (
+            <img src={em} alt="i"/>
+
+          ) ) }
+        </div>
       </div>
     )
   }

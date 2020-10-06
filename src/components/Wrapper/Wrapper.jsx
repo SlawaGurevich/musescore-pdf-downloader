@@ -4,7 +4,7 @@ import MainScreen from '../MainScreen'
 
 const Wrapper = (props) => {
   return (
-    <MainScreen dialog={props.dialog} fs={props.fs} request={props.request} />
+    <MainScreen dialog={props.dialog} fs={props.fs} request={props.request} imgToPDF={props.imgToPDF} />
   )
 }
 

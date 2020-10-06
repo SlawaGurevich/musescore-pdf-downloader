@@ -115,3 +115,15 @@
   display: flex;
   margin: 30px 0;
 }
+
+.preview {
+  display: flex;
+  text-align: center;
+  align-items: center;
+
+  img {
+    height: 200px;
+    width: auto;
+    margin: 0 10px;
+  }
+}
