@@ -3,8 +3,6 @@ import React, { Component } from 'react'
 import './MainScreen.scss'
 
 const superagent = require('superagent')
-const $ = require('cheerio');
-
 
 class MainScreen extends Component {
   constructor(props) {
