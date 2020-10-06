@@ -82,7 +82,11 @@ class MainScreen extends Component {
 
   render() {
     return (
-      <>
+      <div className="main-screen">
+        <div className="main-screen__musescore-logo">
+          <img src="musescore.png" alt=""/>
+          <div className="">Downloader</div>
+        </div>
         <div>{ this.state.saveLocation || "Please select a location!" } <button onClick={ this.selectLocaction }>Select</button></div>
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="musescoreUrl">Please provide a musescore URL</label>
@@ -93,7 +97,7 @@ class MainScreen extends Component {
             <img src={em} alt="i"/>
           ) ) }
         </form>
-      </>
+      </div>
     )
   }
 }

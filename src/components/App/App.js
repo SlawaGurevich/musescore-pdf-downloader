@@ -2,6 +2,8 @@ import React from 'react';
 
 import MainScreen from '../MainScreen'
 
+import './App.scss'
+
 const electron = window.require('electron')
 const fs = electron.remote.require('fs')
 const request = electron.remote.require('request')

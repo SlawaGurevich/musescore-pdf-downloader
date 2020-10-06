@@ -1,0 +1,18 @@
+body, html, #root {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  color: white;
+}
+
+#root {
+  background-color: #1f74bd;
+}
+
+button {
+  border: none;
+  padding: 10px 15px;
+  border-radius: 2px;
+  background-color: white;
+}
