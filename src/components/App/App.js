@@ -1,6 +1,6 @@
 import React from 'react';
 
-import MainScreen from '../MainScreen'
+import Wrapper from '../Wrapper'
 
 import './App.scss'
 
@@ -12,7 +12,7 @@ const { dialog } = window.require('electron').remote
 
 function App() {
   return (
-    <MainScreen dialog={dialog} fs={fs} request={request}/>
+    <Wrapper dialog={dialog} fs={fs} request={request}/>
   );
 }
 

@@ -14,7 +14,9 @@ class MainScreen extends Component {
       dom: null,
       images: [],
       saveLocation: '',
-      format: ''
+      format: '',
+      saveImages: false,
+      savePdf: false
     }
 
     this.onLinkChange = this.handleChange.bind(this)
@@ -30,6 +32,14 @@ class MainScreen extends Component {
       .then(result => {
         this.setState({saveLocation: result.filePaths[0]})
       })
+  }
+
+  saveImagesToggle = (event) => {
+    this.setState({saveImages: !this.state.saveImages})
+  }
+
+  savePdfToggle = (event) => {
+    this.setState({savePdf: !this.state.savePdf})
   }
 
   download = (uri, filename, callback) => {
@@ -84,19 +94,32 @@ class MainScreen extends Component {
     return (
       <div className="main-screen">
         <div className="main-screen__musescore-logo">
-          <img src="musescore.png" alt=""/>
-          <div className="">Downloader</div>
+          <img src="Logo_inApp.png" alt=""/>
         </div>
-        <div>{ this.state.saveLocation || "Please select a location!" } <button onClick={ this.selectLocaction }>Select</button></div>
         <form onSubmit={this.handleSubmit}>
-          <label htmlFor="musescoreUrl">Please provide a musescore URL</label>
-          <input onChange={this.onLinkChange} value={this.state.value} id="musescoreUrl" type="text"/>
-
-          <button disabled={!this.state.saveLocation || !this.state.link} type="submit">Download</button>
+          <div className="button-input__wrapper">
+            <input placeholder="Paste musescore url" onChange={this.onLinkChange} value={this.state.value} id="musescoreUrl" type="text"/>
+          </div>
           { this.state.images && this.state.images.map( (em, i) => (
             <img src={em} alt="i"/>
           ) ) }
         </form>
+        <div className="button-input__wrapper">
+          <input type="text" value={ this.state.saveLocation || "Please select a location!" } readOnly={true} />
+          <button onClick={ this.selectLocaction }>SELECT</button>
+        </div>
+        <div className="options">
+          <label class="container">Save Images
+            <input type="checkbox" checked={this.state.saveImages} onChange={this.saveImagesToggle} />
+            <span class="checkmark"></span>
+          </label>
+
+          <label class="container">Save Pdf
+            <input type="checkbox" checked={this.state.savePdf} onChange={this.savePdfToggle} />
+            <span class="checkmark"></span>
+          </label>
+        </div>
+        <button disabled={!this.state.saveLocation || !this.state.link} type="submit">DOWNLOAD</button>
       </div>
     )
   }
