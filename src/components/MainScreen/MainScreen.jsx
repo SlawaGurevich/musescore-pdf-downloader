@@ -60,33 +60,40 @@ class MainScreen extends Component {
         var doc = new DOMParser().parseFromString(response.text, "text/html")
         console.group(response.text)
 
+        console.log(doc.querySelectorAll('link[type="image/svg+xml"][as="image"]'))
+
+        let rex = /((pages_count&quot;:)\d+)/g
+        let pages = response.text.match(rex)[0].replace("pages_count&quot;:","")
+
         let images = []
         let title = doc.querySelectorAll('meta[name="twitter:title"]')[0].content
-        let imagelink = doc.querySelectorAll('meta[property="og:image"]')[0].attributes.content.nodeValue
+        let imagelink = doc.querySelectorAll('link[type="image/svg+xml"][as="image"]')[0].href
 
         this.getFormat(imagelink)
 
         let downloadedImages = []
 
-        for( let i = 0; i < 3; i++) {
+        for( let i = 0; i < pages; i++) {
           let img = imagelink.replace("score_0", `score_${i}`)
-          images.push(img)
-          this.download(img, `${this.state.saveLocation}/${title}_${i}.${this.state.format}`, () => {
-            if ( i == 2 && this.state.savePdf ) {
-              this.props.imgToPDF(downloadedImages, 'A4').pipe(this.props.fs.createWriteStream(`${this.state.saveLocation}/${title}.pdf`));
 
-              if ( !this.state.saveImages ) {
-                downloadedImages.forEach(img => {
-                  try {
-                    this.props.fs.unlinkSync(img)
-                  } catch(err) {
-                    console.log(err)
-                  }
-                })
-              }
+          if (this.state.format == "svg") {
+            this.props.svg2img(img, (error, buffer) => {
+              downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.png`)
+              this.props.fs.writeFile(`${this.state.saveLocation}/${title}_${i}.png`, buffer, () => {
+                if ( i == pages-1 && this.state.savePdf ) {
+                  this.savePdf(downloadedImages.sort(), title)
+                }
+              })
+            })
+          } else {
+            this.download(img, `${this.state.saveLocation}/${title}_${i}.${this.state.format}`, () => {
+              downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.${this.state.format}`)
+            })
+
+            if ( i == pages-1 && this.state.savePdf ) {
+              this.savePdf(downloadedImages, title)
             }
-          })
-          downloadedImages.push(`${this.state.saveLocation}/${title}_${i}.${this.state.format}`)
+          }
         }
 
 
@@ -96,7 +103,20 @@ class MainScreen extends Component {
           images: images
         })
       })
+  }
 
+  savePdf = (images, title) => {
+    this.props.imgToPDF(images, 'A4').pipe(this.props.fs.createWriteStream(`${this.state.saveLocation}/${title}.pdf`));
+
+    if ( !this.state.saveImages ) {
+      images.forEach(img => {
+        try {
+          this.props.fs.unlinkSync(img)
+        } catch(err) {
+          console.log(err)
+        }
+      })
+    }
   }
 
   getFormat = (link) => {
