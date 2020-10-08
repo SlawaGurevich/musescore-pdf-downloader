@@ -63,14 +63,20 @@ class MainScreen extends Component {
         var doc = new DOMParser().parseFromString(response.text, "text/html")
         console.group(response.text)
 
-        console.log(doc.querySelectorAll('link[type="image/svg+xml"][as="image"]'))
-
         let rex = /((pages_count&quot;:)\d+)/g
         let pages = response.text.match(rex)[0].replace("pages_count&quot;:","")
 
         let images = []
         let title = doc.querySelectorAll('meta[name="twitter:title"]')[0].content
-        let imagelink = doc.querySelectorAll('link[type="image/svg+xml"][as="image"]')[0].href
+
+        let imagelink;
+        if( doc.querySelectorAll('link[type="image/svg+xml"][as="image"]').length > 0 ) {
+          imagelink = doc.querySelectorAll('link[type="image/svg+xml"][as="image"]')[0].href
+        } else if ( doc.querySelectorAll('link[type="image/png"][as="image"]').length > 0 ) {
+          imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
+        } else if (imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].length > 0) {
+          imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
+        }
 
         this.getFormat(imagelink)
 
@@ -93,11 +99,11 @@ class MainScreen extends Component {
           } else {
             this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
               downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`)
-            })
 
-            if ( i == pages-1 && this.state.savePdf ) {
-              this.savePdf(downloadedImages, title)
-            }
+              if ( i == pages-1 && this.state.savePdf ) {
+                this.savePdf(downloadedImages.sort(), title)
+              }
+            })
           }
         }
 
@@ -152,21 +158,21 @@ class MainScreen extends Component {
           <button onClick={ this.selectLocaction }>SELECT</button>
         </div>
         <div className="options">
-          <label class="container">Save Images
+          <label className="container">Save Images
             <input type="checkbox" checked={this.state.saveImages} onChange={this.saveImagesToggle} />
-            <span class="checkmark"></span>
+            <span className="checkmark"></span>
           </label>
 
-          <label class="container">Save Pdf
+          <label className="container">Save Pdf
             <input type="checkbox" checked={this.state.savePdf} onChange={this.savePdfToggle} />
-            <span class="checkmark"></span>
+            <span className="checkmark"></span>
           </label>
         </div>
 
         <button disabled={!this.state.saveLocation || !this.state.link} onClick={this.handleSubmit} type="submit">DOWNLOAD</button>
         <div className="preview" style={{ opacity: this.state.images ? 1 : 0 }}>
         { this.state.images && this.state.images.map( (em, i) => (
-            <img src={em} alt="i"/>
+            <img key={i} src={em} alt="i"/>
 
           ) ) }
         </div>

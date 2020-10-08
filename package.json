@@ -65,12 +65,15 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "icons/mac/icon.icns",
+        "name": "Musescore PDF Downloader"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "musescore_pdf_downloader"
+            "name": "Musescore PDF Downloader"
           }
         },
         {
