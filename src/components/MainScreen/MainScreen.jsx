@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { image } from 'superagent/lib/node/parsers'
 
 import './MainScreen.scss'
 
@@ -74,7 +73,7 @@ class MainScreen extends Component {
           imagelink = doc.querySelectorAll('link[type="image/svg+xml"][as="image"]')[0].href
         } else if ( doc.querySelectorAll('link[type="image/png"][as="image"]').length > 0 ) {
           imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
-        } else if (imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].length > 0) {
+        } else if ( doc.querySelectorAll('link[type="image/png"][as="image"]')[0].length > 0 ) {
           imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
         }
 
@@ -87,11 +86,11 @@ class MainScreen extends Component {
           let img = imagelink.replace("score_0", `score_${i}`)
           images.push(img)
 
-          if (this.state.format == "svg") {
+          if (this.state.format === "svg") {
             this.props.svg2img(img, (error, buffer) => {
               downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.png`)
               this.props.fs.writeFile(`${this.state.saveLocation}/${title}_${index}.png`, buffer, () => {
-                if ( i == pages-1 && this.state.savePdf ) {
+                if ( i === pages-1 && this.state.savePdf ) {
                   this.savePdf(downloadedImages.sort(), title)
                 }
               })
@@ -100,7 +99,7 @@ class MainScreen extends Component {
             this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
               downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`)
 
-              if ( i == pages-1 && this.state.savePdf ) {
+              if ( i === pages-1 && this.state.savePdf ) {
                 this.savePdf(downloadedImages.sort(), title)
               }
             })
