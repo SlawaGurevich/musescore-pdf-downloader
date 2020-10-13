@@ -1,6 +1,6 @@
 @import '../../globals/global_variables';
 
-$title-bar__height: 4.6 * $grid__unit; // 23px
+$title-bar__height: 6 * $grid__unit; // 23px
 
 #title-bar {
   display: flex;
@@ -16,8 +16,10 @@ $title-bar__height: 4.6 * $grid__unit; // 23px
   transition: background-color 200ms ease-in-out;
 	-webkit-user-select: none;
   -webkit-app-region: drag;
+}
 
-  &:hover {
-    background-color: rgba(255, 255, 255, .1);
-  }
+.logo {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 40px;
 }

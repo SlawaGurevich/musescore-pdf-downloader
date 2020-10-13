@@ -1,3 +1,19 @@
+@import '../../globals/global_variables';
+
+@keyframes interaction-indicator {
+  0% {
+    box-shadow: 0 0 15px 0 rgba($color__accent, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 15px 0 rgba($color__accent, 1);
+  }
+
+  100% {
+    box-shadow: 0 0 15px 0 rgba($color__accent, 0);
+  }
+}
+
 .main-screen {
   display: flex;
   flex-direction: column;
@@ -8,37 +24,73 @@
 }
 
 .button-input__wrapper {
+  @extend %shadow-default;
   display: flex;
   min-width: 500px;
   min-height: 50px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   border: 1px solid white;
   border-radius: 10px;
+  background-color: white;
+  transition: box-shadow 500ms ease-in-out, transform 500ms ease-in-out;
 
-  input {
-    flex-grow: 1;
-    padding: 0 10px 0;
-    border: none;
-    background: none;
+  &:hover {
+    @extend %shadow-hover;
+
+    button {
+      animation: interaction-indicator 2s infinite;
+    }
+  }
+
+  button {
+    background-color: $color__accent;
+    margin: 4px;
     color: white;
-    font-size: 1.2rem;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, .2);
-    }
-
-    &::placeholder {
-      color: white;
-    }
 
     &:focus {
       outline: none;
     }
   }
 
-  button {
-    border-radius: 0 6px 6px 0;
-    cursor: pointer;
+  input {
+    flex-grow: 1;
+    padding: 0 10px 0;
+    border: none;
+    background: white;
+    color: $color__foreground--main;
+    border-radius: $border-radius__default;
+    font-size: 1.2rem;
+    transition: background-color 500ms ease-in-out;
+
+    &.border-left-side-only {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, .2);
+    }
+
+    &::placeholder {
+      color: gray;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+button[type=submit] {
+  padding: 15px 20px;
+  background: $color__accent;
+  color: white;
+  transition: all 500ms ease-in-out;
+
+  &:disabled {
+    background: white;
+    color: gray;
+    cursor: not-allowed;
   }
 }
 
@@ -46,11 +98,11 @@
 .container {
   display: block;
   position: relative;
-  padding-left: 35px;
+  padding-left: 28px;
   margin-bottom: 12px;
   margin-right: 20px;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 16px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -59,12 +111,13 @@
     /* Create a custom checkbox */
   .checkmark {
     position: absolute;
-    top: 0;
+    top: -3px;
     left: 0;
-    height: 25px;
-    width: 25px;
+    height: 20px;
+    width: 20px;
     border-radius: 5px;
     border: 1px solid white;
+    transition: all 200ms ease-in-out;
   }
 
   input {
@@ -82,7 +135,7 @@
 
   /* When the checkbox is checked, add a blue background */
   & input:checked ~ .checkmark {
-
+    border-color: $color__accent;
   }
 
   /* Show the checkmark when checked */
@@ -92,11 +145,11 @@
 
 /* Style the checkmark/indicator */
   & .checkmark:after {
-    left: 9px;
-    top: 5px;
+    left: 6px;
+    top: 2px;
     width: 5px;
     height: 10px;
-    border: solid white;
+    border: solid $color__accent;
     border-width: 0 3px 3px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);

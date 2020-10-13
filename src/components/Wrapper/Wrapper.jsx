@@ -13,7 +13,7 @@ const TitleBar = () => {
 const Wrapper = (props) => {
   return (
     <>
-      <MainScreen dialog={props.dialog} fs={props.fs} request={props.request} imgToPDF={props.imgToPDF} svg2img={props.svg2img} />
+      <MainScreen dialog={props.dialog} fs={props.fs} request={props.request} imgToPDF={props.imgToPDF} />
       <TitleBar />
     </>
   )

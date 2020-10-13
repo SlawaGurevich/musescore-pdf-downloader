@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 
 import './MainScreen.scss'
 
+import {svg2png} from 'svg-png-converter'
+
 const superagent = require('superagent')
 
 class MainScreen extends Component {
@@ -78,18 +80,27 @@ class MainScreen extends Component {
         }
 
         this.getFormat(imagelink)
+        console.log(imagelink)
 
         let downloadedImages = []
 
         for( let i = 0; i < pages; i++) {
+          let that = this
           let index = i > 9 ? i : `0${i}`;
           let img = imagelink.replace("score_0", `score_${i}`)
           images.push(img)
 
           if (this.state.format === "svg") {
-            this.props.svg2img(img, (error, buffer) => {
+            this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
               downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.png`)
-              this.props.fs.writeFile(`${this.state.saveLocation}/${title}_${index}.png`, buffer, () => {
+
+              svg2png({
+                input: that.props.fs.readFileSync(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`),
+                encoding: "buffer",
+                format: "png"
+              }).then((outputBuffer) => {
+                that.props.fs.writeFileSync(`${this.state.saveLocation}/${title}_${index}.png`, outputBuffer)
+
                 if ( i === pages-1 && this.state.savePdf ) {
                   this.savePdf(downloadedImages.sort(), title)
                 }
@@ -100,6 +111,7 @@ class MainScreen extends Component {
               downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`)
 
               if ( i === pages-1 && this.state.savePdf ) {
+                console.log(downloadedImages.sort())
                 this.savePdf(downloadedImages.sort(), title)
               }
             })
@@ -145,7 +157,7 @@ class MainScreen extends Component {
     return (
       <div className="main-screen">
         <div className="main-screen__musescore-logo">
-          <img src="Logo_inApp.png" alt=""/>
+          <img src="Logo_inApp.png" alt="Musescore PDF Downloader" className="logo" />
         </div>
         <form>
           <div className="button-input__wrapper">
@@ -153,7 +165,7 @@ class MainScreen extends Component {
           </div>
         </form>
         <div className="button-input__wrapper">
-          <input type="text" value={ this.state.saveLocation || "Please select a location!" } readOnly={true} />
+          <input className="border-left-side-only" type="text" value={ this.state.saveLocation || "Please select a location!" } readOnly={true} />
           <button onClick={ this.selectLocaction }>SELECT</button>
         </div>
         <div className="options">
