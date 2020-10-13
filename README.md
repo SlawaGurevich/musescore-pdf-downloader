@@ -1,68 +1,43 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Musescore PDF Downloader v0.2.2
 
-## Available Scripts
+![](https://drive.slawagurevich.com/musescore-pdf.png)
 
-In the project directory, you can run:
+## What is this?
 
-### `npm start`
+**Musescore PDF Downloader** is just that. An electron app, that lets you download any sheet from musescore as a PDF.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Why does this exist
+![](https://drive.slawagurevich.com/pepperidge-farm-remembers.jpg)
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+... and I do, too. A long time ago (a year or so) it was still possible to download PDFs from musescore. However, they removed this features because of ... well, you know why. Although that wasn't that big of a deal, since you can still get the image source from the page and then convert the SVGs to PNG and _then_ create a PDF, it is quite the effort doing it for each song. So this app automates just that. It
 
-### `npm test`
+1. Gets the link of the image form the page
+2. Checks the image type
+	1. Converts the image to PNG before downloading **or**
+	2. Downloads the PNG image
+3. Creates a PDF with the combined images
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Is that legal?
+Heck if I know... But I would like to direct you to [a similar project here](https://github.com/Xmader/musescore-downloader). I am in general of the same opinion, so make of that what you will.
 
-### `npm run build`
+## Features
+Not much so far
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Download images from musescore
+- Combine images into PDF
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+## to-do
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Include the option to download the music as well
+- Sync the process better, so that the PDF is only created when all the images have been downloaded
+- Allow for pasting multiple links and download of multiple files
+- The app size is still horrifically huge. I am trying to find out why and bring it down to about 50mb...
 
-### `npm run eject`
+## Known Bugs
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- The syncing is sometimes off, meaning that the PDF is going to get created before all the images have been downloaded. (Until I figure this out, just click the Download button again, it should work fine, if all images are present)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+## For devs
+### Building
+If you want to build the app, just run ```npm run make```.
+If you want to start the app, just run ```npm run dev```.
