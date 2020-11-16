@@ -1,5 +1,7 @@
 @import '../../globals/global_variables';
 
+$progress-bar__width: 100 * $grid__unit;
+
 @keyframes interaction-indicator {
   0% {
     box-shadow: 0 0 15px 0 rgba($color__accent, 0);
@@ -11,6 +13,36 @@
 
   100% {
     box-shadow: 0 0 15px 0 rgba($color__accent, 0);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotateZ(0deg)
+  }
+
+  50% {
+    transform: rotateZ(180deg)
+  }
+
+  100% {
+    transform: rotateZ(360deg)
+  }
+}
+
+.progress-bar {
+  width: $progress-bar__width;
+  height: 2 * $grid__unit;
+  margin-bottom: $spacer__xl;
+  border-radius: $border-radius__default;
+  background: $color__background--sub;
+  overflow: hidden;
+
+  &-inner {
+    height: 100%;
+    width: 0;
+    background-color: $color__accent;
+    transition: width 200ms linear;
   }
 }
 
@@ -30,7 +62,7 @@
   min-height: 50px;
   margin-bottom: 20px;
   border: 1px solid white;
-  border-radius: 10px;
+  border-radius: $border-radius__default;
   background-color: white;
   transition: box-shadow 500ms ease-in-out, transform 500ms ease-in-out;
 
@@ -92,6 +124,17 @@ button[type=submit] {
     color: gray;
     cursor: not-allowed;
   }
+
+  svg {
+    animation-name: rotate;
+    animation-duration: 0.7s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+}
+
+img[src*=data] {
+  display: none;
 }
 
 /* Customize the label (the container) */
@@ -115,7 +158,7 @@ button[type=submit] {
     left: 0;
     height: 20px;
     width: 20px;
-    border-radius: 5px;
+    border-radius: $border-radius__default;
     border: 1px solid white;
     transition: all 200ms ease-in-out;
   }

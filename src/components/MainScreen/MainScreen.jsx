@@ -3,8 +3,17 @@ import React, { Component } from 'react'
 import './MainScreen.scss'
 
 import {svg2png} from 'svg-png-converter'
+import { ArrowClockwise } from 'react-bootstrap-icons'
 
 const superagent = require('superagent')
+
+const ProgressBar = ({percentage}) => {
+  return (
+    <div className="progress-bar">
+      <div className="progress-bar-inner" style={{width: `${percentage}%`}}></div>
+    </div>
+  )
+}
 
 class MainScreen extends Component {
   constructor(props) {
@@ -16,7 +25,10 @@ class MainScreen extends Component {
       saveLocation: '',
       format: '',
       saveImages: true,
-      savePdf: true
+      savePdf: true,
+      pages: 0,
+      downloadedPages: 0,
+      downloading: false
     }
 
     this.onLinkChange = this.handleChange.bind(this)
@@ -51,91 +63,169 @@ class MainScreen extends Component {
     });
   };
 
-  handleSubmit(event) {
-    this.setState({
-      images: [], dom: null, format: ''
-    })
+  async scrollAndGetLinks(page, pages) {
+    let links = []
 
-    event.preventDefault()
-    superagent
-      .get(this.state.link)
-      .end((error, response) => {
+    try {
+      let previousHeight = 0
 
-        var doc = new DOMParser().parseFromString(response.text, "text/html")
-        console.group(response.text)
+      await page.evaluate("let view = document.querySelector('img[src*=score_0]').parentNode.parentNode")
+      await page.evaluate("let currentImage")
+      let scrollHeight = await page.evaluate("view.scrollHeight")
+      let scrollAmount = await page.evaluate("view.offsetHeight")
+      console.log(scrollHeight)
 
-        let rex = /((pages_count&quot;:)\d+)/g
-        let pages = response.text.match(rex)[0].replace("pages_count&quot;:","")
+      while( links.length < pages ) {
+        console.log("while", links.length, pages)
+        let imageLink = await page.evaluate(
+          "currentImage = document.querySelector('img[src*=score_" + links.length + "]');" +
+          "if (currentImage) {" +
+          "document.querySelector('img[src*=score_" + links.length + "]').src" +
+          "}"
+        )
+        console.log("imageLink ", imageLink)
+        previousHeight = await page.evaluate('view.scrollTop');
+        await page.evaluate(`view.scrollTop += ${scrollAmount}`);
+        await page.waitForFunction(`view.scrollTop > ${previousHeight}`);
 
-        let images = []
-        let title = doc.querySelectorAll('meta[name="twitter:title"]')[0].content
-
-        let imagelink;
-        if( doc.querySelectorAll('link[type="image/svg+xml"][as="image"]').length > 0 ) {
-          imagelink = doc.querySelectorAll('link[type="image/svg+xml"][as="image"]')[0].href
-        } else if ( doc.querySelectorAll('link[type="image/png"][as="image"]').length > 0 ) {
-          imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
-        } else if ( doc.querySelectorAll('link[type="image/png"][as="image"]')[0].length > 0 ) {
-          imagelink = doc.querySelectorAll('link[type="image/png"][as="image"]')[0].href
+        if( imageLink && links.indexOf(imageLink) < 0 ) {
+          links.push(imageLink)
         }
 
-        this.getFormat(imagelink)
-        console.log(imagelink)
+        await page.waitFor(500)
+      }
+    } catch(err) {
+      console.log("error", err)
+    }
+
+    return links
+  }
+
+  async handleSubmit(event) {
+    event.preventDefault()
+
+    this.setState({
+      images: [],
+      dom: null,
+      format: '',
+      pages: 0,
+      downloadedPages: 0,
+      downloading: true
+    })
+
+    // Get meta
+    superagent
+      .get(this.state.link)
+      .then((response) => {
+        var doc = new DOMParser().parseFromString(response.text, "text/html")
+
+        // page count
+        let rex = /((pages_count&quot;:)\d+)/g
+        return response.text.match(rex)[0].replace("pages_count&quot;:","")
+      }).then(async pages => {
+        this.setState({
+          pages: parseInt(pages)
+        })
+
+        const browser = await this.props.puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+
+        const page = await browser.newPage();
+        page.setViewport({ width: 1280, height: 720 });
+
+        await page.goto(this.state.link);
+
+        // getTitle
+        let titleOfDocument = await page.evaluate(`document.querySelector("meta[name='twitter:title']").content`)
+
+        // get initial link for format and set it
+        let linkOfInitialImage = await page.evaluate("document.querySelector('img[src*=score_0]').src")
+        this.getFormat(linkOfInitialImage)
+
+        // get the download Links
+        let downloadLinks = await this.scrollAndGetLinks(page, this.state.pages)
+
+        console.log("toDownload", downloadLinks)
+        console.log("pages", this.state.pages)
+
+        await browser.close()
+        // BROWSER END
 
         let downloadedImages = []
+        let images = []
+        let that = this
 
-        for( let i = 0; i < pages; i++) {
-          let that = this
+        downloadLinks.forEach((link, i) => {
           let index = i > 9 ? i : `0${i}`;
-          let img = imagelink.replace("score_0", `score_${i}`)
-          images.push(img)
+          images.push(link)
 
-          if (this.state.format === "svg") {
-            this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
-              downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.png`)
+          if (this.state.format === 'svg') {
+            console.log("i", i)
+            this.download(link, `${this.state.saveLocation}/${titleOfDocument}_${index}.${this.state.format}`, () => {
+                svg2png({
+                  input: that.props.fs.readFileSync(`${this.state.saveLocation}/${titleOfDocument}_${index}.${this.state.format}`),
+                  encoding: "buffer",
+                  format: "png"
+                }).then((outputBuffer) => {
+                  that.props.fs.writeFileSync(`${this.state.saveLocation}/${titleOfDocument}_${index}.png`, outputBuffer)
+                  this.setState({
+                    downloadedPages: this.state.downloadedPages += 1
+                  })
 
-              svg2png({
-                input: that.props.fs.readFileSync(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`),
-                encoding: "buffer",
-                format: "png"
-              }).then((outputBuffer) => {
-                that.props.fs.writeFileSync(`${this.state.saveLocation}/${title}_${index}.png`, outputBuffer)
+                  try {
+                    this.props.fs.unlinkSync(`${this.state.saveLocation}/${titleOfDocument}_${index}.svg`)
+                  } catch(err) {
+                    console.log(err)
+                  }
 
-                if ( i === pages-1 && this.state.savePdf ) {
-                  this.savePdf(downloadedImages.sort(), title)
-                }
+                  downloadedImages.push(`${this.state.saveLocation}/${titleOfDocument}_${index}.png`)
+
+                  console.log("downloaded", downloadedImages.length, this.state.pages)
+                  if ( downloadedImages.length === this.state.pages && this.state.savePdf ) {
+                    console.log("download after svg")
+                    this.savePdf(downloadedImages.sort(), titleOfDocument)
+                  }
+                })
               })
-            })
           } else {
-            this.download(img, `${this.state.saveLocation}/${title}_${index}.${this.state.format}`, () => {
-              downloadedImages.push(`${this.state.saveLocation}/${title}_${index}.${this.state.format}`)
+            console.log("i", i)
+            this.download(link, `${this.state.saveLocation}/${titleOfDocument}_${index}.${this.state.format}`, () => {
+              downloadedImages.push(`${this.state.saveLocation}/${titleOfDocument}_${index}.${this.state.format}`)
+              this.setState({
+                downloadedPages: this.state.downloadedPages += 1
+              })
 
-              if ( i === pages-1 && this.state.savePdf ) {
-                console.log(downloadedImages.sort())
-                this.savePdf(downloadedImages.sort(), title)
+              console.log("downloaded", downloadedImages.length, pages)
+              if ( downloadedImages.length === this.state.pages && this.state.savePdf ) {
+                console.log("download after png")
+                this.savePdf(downloadedImages.sort(), titleOfDocument)
               }
             })
           }
-        }
 
-        this.setState({
-          images: images
+          this.setState({images: images, downloading: this.state.savePdf})
         })
       })
   }
 
   savePdf = (images, title) => {
+    console.log("fromIamges", images)
     this.props.imgToPDF(images, 'A4').pipe(this.props.fs.createWriteStream(`${this.state.saveLocation}/${title}.pdf`));
 
     if ( !this.state.saveImages ) {
       images.forEach(img => {
         try {
+          console.log("remove", img)
           this.props.fs.unlinkSync(img)
         } catch(err) {
           console.log(err)
         }
       })
     }
+
+    this.setState({downloading: false})
   }
 
   getFormat = (link) => {
@@ -180,7 +270,9 @@ class MainScreen extends Component {
           </label>
         </div>
 
-        <button disabled={!this.state.saveLocation || !this.state.link} onClick={this.handleSubmit} type="submit">DOWNLOAD</button>
+        <ProgressBar percentage={ this.state.pages > 0 ? 100 * this.state.downloadedPages / this.state.pages : 0 } />
+        <button disabled={!this.state.saveLocation || !this.state.link || this.state.downloading } onClick={this.handleSubmit} type="submit">{ this.state.downloading ? <ArrowClockwise size={ 20 } /> : "DOWNLOAD" }</button>
+
         <div className="preview" style={{ opacity: this.state.images ? 1 : 0 }}>
         { this.state.images && this.state.images.map( (em, i) => (
             <img key={i} src={em} alt="i"/>

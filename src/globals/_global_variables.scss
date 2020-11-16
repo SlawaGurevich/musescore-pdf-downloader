@@ -3,8 +3,9 @@ $grid__unit: 5px;
 $color__accent: #1f74bd;
 $color__background--main: #efefef;
 $color__foreground--main: #333;
+$color__background--sub: #c7c6c6;
 
-$border-radius__default: 2 * $grid__unit;
+$border-radius__default: $grid__unit;
 
 $spacer__s: $grid__unit;
 $spacer__m: 2 * $grid__unit;
@@ -20,5 +21,5 @@ $spacer__xl: 8 * $grid__unit;
   box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .1),
               0 3px 3px 0 rgba(0, 0, 0, .1),
               0 7px 7px 0 rgba(0, 0, 0, .1);
-  transform: translateY(-3px);
+  transform: translateY(-1px);
 }
